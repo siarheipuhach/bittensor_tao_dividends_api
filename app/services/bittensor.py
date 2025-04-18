@@ -140,9 +140,9 @@ async def submit_stake_adjustment(netuid: int, hotkey: str, sentiment: int):
         result = await subtensor.add_stake(
             wallet=wallet, netuid=netuid, hotkey_ss58=hotkey, amount=amount
         )
-        print(f"✅ Stake result: {result}")
+        print(f"Stake result: {result}")
     else:
         result = await subtensor.unstake(
             wallet=wallet, netuid=netuid, hotkey_ss58=hotkey, amount=amount
         )
-        print(f"🔻 Unstake result: {result}")
+        print(f"Unstake result: {result}")
