@@ -1,9 +1,12 @@
 # Test your FastAPI endpoints
 
-GET http://127.0.0.1:8000/
+GET http://localhost:8000/api/v1/tao_dividends?hotkey=5FFApaS75bv5pJHfAp2FVLBj9ZaXuFDjEypsaBNc1wCfe52v&trade=false
 Accept: application/json
+Authorization: Bearer some_secret_auth_token
+
 ###
 
 GET http://127.0.0.1:8000/hello/User
 Accept: application/json
+
 ###

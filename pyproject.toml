@@ -1,0 +1,27 @@
+[project]
+name = "python-test-task"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi",
+  "uvicorn",
+  "redis",
+  "celery",
+  "httpx",
+  "pydantic",
+  "pydantic-settings",
+  "python-dotenv",
+  "pytest",
+  "motor",
+  "pytest-asyncio",
+  "anyio",
+  "pytest-asyncio",
+  "pytest-tornasync",
+  "pytest-trio",
+  "pytest-twisted",
+  "twisted",
+  "bittensor",
+  "substrate-interface"
+]

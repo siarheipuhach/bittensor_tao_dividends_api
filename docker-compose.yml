@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
   api:
     build: .
@@ -7,6 +5,9 @@ services:
       - "8000:8000"
     environment:
       - REDIS_URL=redis://redis:6379
+      - DATURA_API_KEY=
+      - CHUTES_API_KEY=cpk_9402c24cc755440b94f4b0931ebaa272.7a748b60e4a557f6957af9ce25778f49.8huXjHVlrSttzKuuY0yU2Fy4qEskr5J0
+      - AUTH_TOKEN=some_secret_auth_token
     depends_on:
       - redis
     volumes:
@@ -19,7 +20,7 @@ services:
 
   worker:
     build: .
-    command: celery -A app.tasks.celery_worker worker --loglevel=info
+    command: celery -A app.celery worker --loglevel=info
     depends_on:
       - redis
     environment:
