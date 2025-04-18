@@ -23,5 +23,6 @@ dependencies = [
   "pytest-twisted",
   "twisted",
   "bittensor",
-  "substrate-interface"
+  "substrate-interface",
+  "bittensor-wallet",
 ]
