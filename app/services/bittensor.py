@@ -2,16 +2,29 @@ import asyncio
 import json
 
 from async_substrate_interface.async_substrate import AsyncSubstrateInterface
-from bittensor import AsyncSubtensor, DynamicInfo
+from bittensor import AsyncSubtensor, DynamicInfo, Balance
 from bittensor.core.settings import SS58_FORMAT
 from scalecodec.utils import ss58
 
 from app.api.v1.schemas import TaoDividendResponse
 from app.cache.redis import redis_cache
 
+from bittensor_wallet import Wallet
+
+
+# Load wallet from name and path
+async def get_wallet(hotkey):
+    my_wallet = Wallet(
+        name="bittensor_test_wallet_",
+        path="~/.bittensor_wallet",
+        hotkey=hotkey,
+    )
+    my_wallet.unlock_hotkey()
+    return my_wallet
+
 
 async def process_single_query(
-    netuid: int, hotkey: str, trade: bool, substrate
+    netuid: int, hotkey: str, trade: bool, substrate=None
 ) -> TaoDividendResponse:
     cache_key = f"dividends:{netuid}:{hotkey}"
     cached = await redis_cache.get(cache_key)
@@ -24,8 +37,11 @@ async def process_single_query(
             cached=True,
             stake_tx_triggered=False,
         )
-
-    dividend = await get_tao_dividend_for_hotkey(netuid, hotkey, substrate)
+    if substrate is None:
+        async with AsyncSubstrateInterface(
+            url="wss://entrypoint-finney.opentensor.ai:443", ss58_format=SS58_FORMAT
+        ) as substrate:
+            dividend = await get_tao_dividend_for_hotkey(netuid, hotkey, substrate)
     await redis_cache.set(cache_key, json.dumps(dividend))
 
     # TODO: trigger background stake/unstake task if trade=True
@@ -80,13 +96,13 @@ async def get_dividends(
 ) -> list[TaoDividendResponse]:
     results: list[TaoDividendResponse] = []
 
+    if netuid and hotkey:
+        result = await process_single_query(netuid, hotkey, trade)
+        return [result]
+
     async with AsyncSubstrateInterface(
         url="wss://entrypoint-finney.opentensor.ai:443", ss58_format=SS58_FORMAT
     ) as substrate:
-
-        if netuid and hotkey:
-            result = await process_single_query(netuid, hotkey, trade, substrate)
-            return [result]
 
         if netuid and not hotkey:
             hotkeys = await get_hotkeys_for_netuid(netuid, substrate)
@@ -104,3 +120,29 @@ async def get_dividends(
                 results.extend(await asyncio.gather(*tasks))
 
         return results
+
+
+async def submit_stake_adjustment(netuid: int, hotkey: str, sentiment: int):
+    if sentiment == 0:
+        print("Neutral sentiment — no action taken.")
+        return
+
+    rao = abs(int(sentiment * 0.01 * 1e9))  # Always positive
+    if rao <= 0:
+        print("Too small amount — skipping staking.")
+        return
+    amount = Balance.from_rao(rao).set_unit(netuid)
+
+    wallet = await get_wallet(hotkey)
+    subtensor = AsyncSubtensor()  # or get a shared one if available
+
+    if sentiment > 0:
+        result = await subtensor.add_stake(
+            wallet=wallet, netuid=netuid, hotkey_ss58=hotkey, amount=amount
+        )
+        print(f"✅ Stake result: {result}")
+    else:
+        result = await subtensor.unstake(
+            wallet=wallet, netuid=netuid, hotkey_ss58=hotkey, amount=amount
+        )
+        print(f"🔻 Unstake result: {result}")

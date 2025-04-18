@@ -1,9 +1,12 @@
-from fastapi import FastAPI, Depends
+import traceback
+from contextlib import asynccontextmanager
+
+from fastapi import FastAPI, Depends, Request
+from fastapi.responses import JSONResponse
+
 from app.api.v1.routes import router as api_router
 from app.auth.auth import verify_token
-
 from app.cache.redis import redis_cache
-from contextlib import asynccontextmanager
 
 
 @asynccontextmanager
@@ -15,10 +18,6 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title="Bittensor Tao Dividends API", lifespan=lifespan)
 
 app.include_router(api_router, prefix="/api/v1", dependencies=[Depends(verify_token)])
-
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
-import traceback
 
 
 @app.exception_handler(Exception)
