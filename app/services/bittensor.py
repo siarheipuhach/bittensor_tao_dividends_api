@@ -124,14 +124,13 @@ async def get_dividends(
     """Get dividends for netuid."""
     results: List[TaoDividendResponse] = []
 
+    if netuid and hotkey:
+        result = await process_single_query(netuid, hotkey, trade)
+        return [result]
+
     async with AsyncSubstrateInterface(
         url="wss://entrypoint-finney.opentensor.ai:443", ss58_format=SS58_FORMAT
     ) as substrate:
-
-        if netuid and hotkey:
-            result = await process_single_query(netuid, hotkey, trade, substrate)
-            return [result]
-
         if netuid:
             hotkeys = await get_hotkeys_for_netuid(netuid, substrate)
             tasks = [process_single_query(netuid, h, trade, substrate) for h in hotkeys]

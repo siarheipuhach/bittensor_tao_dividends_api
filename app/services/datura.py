@@ -57,7 +57,7 @@ async def search_twitter_subnet_mentions(
         async with httpx.AsyncClient(timeout=15) as client:
             response = await client.get(DATURA_API_URL, params=params, headers=headers)
             response.raise_for_status()
-            tweets = await response.json()
+            tweets = response.json()
             logger.info(f"Retrieved {len(tweets)} tweets for netuid {netuid}.")
             return tweets
 
