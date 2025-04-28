@@ -106,8 +106,5 @@ docker compose exec api pytest
 
 ---
 
-## 🧼 TODO
-
-- Logging
-- Unit tests for staking logic
-- Better error handling for wallet password prompts
+## Demo
+- [Demo video](https://www.loom.com/share/4d8ea84920ce42b0ae7caeafabf7d48b)
