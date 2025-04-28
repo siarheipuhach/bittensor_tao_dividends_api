@@ -25,4 +25,7 @@ dependencies = [
   "bittensor",
   "substrate-interface",
   "bittensor-wallet",
+  "sqlalchemy[asyncio]",
+  "asyncpg",
+  "pytest-mock",
 ]
