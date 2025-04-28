@@ -1,7 +1,8 @@
 import types
 
 import pytest
-from app.services.bittensor import get_all_netuids, get_hotkeys_for_netuid
+
+from app.services.bittensor import get_hotkeys_for_netuid
 
 
 @pytest.mark.asyncio

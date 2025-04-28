@@ -1,6 +1,7 @@
-import pytest
 import datetime
 from unittest.mock import AsyncMock
+
+import pytest
 
 from app.services.datura import search_twitter_subnet_mentions
 

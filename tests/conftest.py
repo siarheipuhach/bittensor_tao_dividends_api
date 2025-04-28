@@ -41,19 +41,6 @@ def override_settings(monkeypatch):
 
 
 @pytest.fixture
-def mock_aiohttp_client(mocker):
-    """
-    Fixture to mock aiohttp.ClientSession for tests.
-    Usage:
-        def test_something(mock_aiohttp_client):
-            ...
-    """
-    mock_session_cls = mocker.patch("aiohttp.ClientSession", autospec=True)
-    mock_session = mock_session_cls.return_value.__aenter__.return_value
-    return mock_session
-
-
-@pytest.fixture
 def mock_httpx_client(mocker):
     mock_client = mocker.patch("httpx.AsyncClient", autospec=True)
     mock_instance = mock_client.return_value

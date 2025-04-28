@@ -33,8 +33,6 @@ async def test_tao_dividends_with_auth(
     client,
 ):
     """Test authenticated access with optional trade parameter triggers background tasks correctly."""
-
-    # Patch expected auth token
     mocker.patch("app.auth.auth.settings.auth_token", "test")
 
     headers = {"Authorization": "Bearer test"}
