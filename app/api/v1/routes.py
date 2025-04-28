@@ -1,8 +1,7 @@
-import asyncio
-from datetime import date, timedelta
+from typing import Optional
 
-from fastapi import APIRouter, Depends, Query, HTTPException, Header
-from typing import Annotated, Optional, Union
+from fastapi import APIRouter, Depends, Query, status, BackgroundTasks
+
 from app.api.v1.schemas import TaoDividendResponse
 from app.auth.auth import verify_token
 from app.services.bittensor import get_dividends
@@ -14,15 +13,33 @@ router = APIRouter()
 @router.get(
     "/tao_dividends",
     response_model=list[TaoDividendResponse],
+    status_code=status.HTTP_200_OK,
+    summary="Fetch Tao Dividends",
+    description=(
+        "Fetch Tao Dividends for a given netuid and hotkey. "
+        "Optionally trigger sentiment-based stake/unstake if trade is enabled."
+    ),
 )
 async def tao_dividends(
-    netuid: Optional[int] = Query(default=None),
-    hotkey: Optional[str] = Query(default=None),
-    trade: bool = Query(default=False),
+    background_tasks: BackgroundTasks,
+    netuid: Optional[int] = Query(
+        default=None, description="Subnet netuid ID (optional)"
+    ),
+    hotkey: Optional[str] = Query(
+        default=None, description="Hotkey SS58 address (optional)"
+    ),
+    trade: bool = Query(
+        default=False, description="Whether to perform stake/unstake based on sentiment"
+    ),
     _: None = Depends(verify_token),
-):
-    results: list[TaoDividendResponse] = await get_dividends(netuid, hotkey, trade)
+) -> list[TaoDividendResponse]:
+    """
+    Fetch Tao dividends from the Bittensor blockchain. Optionally triggers sentiment analysis
+    and automated stake/unstake via background task if `trade=true`.
+    """
+    results = await get_dividends(netuid, hotkey, trade)
 
     if trade:
-        perform_trade_task.delay(netuid, hotkey)
+        background_tasks.add_task(perform_trade_task.delay, netuid, hotkey)
+
     return results
